@@ -1,0 +1,32 @@
+#!/bin/bash
+echo "Image-ID , CreationDate" > op.csv
+while read IMAGE_ID;
+do
+      DATE=$(aws ec2 describe-images --image-ids ${IMAGE_ID} --query 'Images[].CreationDate[]' --output text | awk -F 'T' '{print $1}') 
+      echo "${IMAGE_ID},${DATE}" >> op.csv
+done < ami-list
+
+#!/bin/bash
+echo "Image-ID , CreationDate" > op.csv
+while read IMAGE_ID;
+do
+      DATE=$(aws ec2 describe-tags --filters "Name=resource-id,Values=${IMAGE_ID}") 
+      echo "${IMAGE_ID},${DATE}" >> op.csv
+done < ami-list
+
+
+1. date-script
+
+aws-1
+aws-3-op
+
+1532
+
+2. date-script-2
+
+aws-2
+aws-4-op
+3907
+
+
+aws ec2 describe-tags --filters "Name=resource-id,Values=${IMAGE_ID}"

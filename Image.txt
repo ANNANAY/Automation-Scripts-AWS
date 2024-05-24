@@ -1,0 +1,17 @@
+
+Get Image Creation Date
+
+
+#!/bin/bash
+
+echo "Image-ID , CreationDate" >> output.csv
+
+while read IMAGE_ID;
+
+do
+   
+     DATE=$(aws ec2 describe-images --image-ids ${IMAGE_ID} --query 'Images[].CreationDate[]' --output text | awk -F 'T' '{print $1}')
+
+echo ${IMAGE_ID} "," ${DATE} >> output.csv
+
+done < ami

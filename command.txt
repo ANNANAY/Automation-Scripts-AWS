@@ -1,0 +1,2 @@
+cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d
+ls -al

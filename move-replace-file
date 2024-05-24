@@ -1,0 +1,3 @@
+#!/bin/bash
+file1=`ls /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/`
+sudo mv /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/$file1 /opt/aws/amazon-cloudwatch-agent/etc/${file1}-old

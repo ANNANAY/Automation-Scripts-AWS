@@ -1,0 +1,73 @@
+---
+description: |
+  ### Backup Home Directory Data - Linux
+schemaVersion: '2.2'
+mainSteps:
+  - action: aws:runShellScript
+    name: backup_home_directory_data_for_ldap_users
+    precondition:
+      StringEquals:
+        - platformType
+        - Linux
+    inputs:
+      runCommand:
+        - |
+            ls -ltr /home | grep ldap | awk '{print $9}' > list
+            INSTANCEID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+            sudo mount shs-nextgen-preprod-fsx-linux.infra.nextgen.oh.shs.com:/shshome /mnt
+            for USER in `cat list`
+            do
+                id $USER > /dev/null
+                if [[ $? -eq 0 ]];
+                then
+                    USERDIR="/home/auto/$USER"
+                    if [ ! -d $USERDIR ];
+                    then
+                        sudo mkdir /mnt/"$USER"
+                        echo "Directory created"
+                        sudo chown -R "$USER":ldap-users /mnt/"$USER"
+                        if [[ $? -eq 1 ]];
+                        then
+                            echo "Copying Directory failed for the LDAP User - $USER"
+                            continue
+                        fi
+                    fi
+                    if [ -d "/home/$USER" ];
+                    then
+                        echo "Directory exists for $USER"
+                        ls -ltr /home/$USER | grep - | awk '{print $9}' | while read -r file;
+                        do
+                            MNT="/mnt/$USER/$file"
+                            HME="/home/$USER/$file"
+                            if [ -f $MNT ];
+                            then
+                                diff -wbBq $MNT $HME >/dev/null
+                                FLAG=$?
+                                if [[ $FLAG -eq 1 ]];
+                                then
+                                    sudo cp -ar $HME "$MNT-$INSTANCEID"
+                                elif [[ $FLAG -eq 0 ]];
+                                then
+                                    echo "$MNT is same as $HME"
+                                else
+                                    echo "Error in the script"
+                                    umount /mnt
+                                    exit 1
+                                fi
+                            else
+                                sudo cp -ar "$HME" "$MNT"
+                            fi
+                            if [[ $? -eq 1 ]];
+                            then
+                                echo "Error in copying from /home/$USER. Code terminated ......"
+                                umount /mnt
+                                exit 1
+                            fi
+                        done 
+                        echo "Copied file success"
+                    fi
+                else
+                    echo "LDAP For the USER does not exists - $USER. Data not copied for the user"
+                fi
+            done
+            sudo umount /mnt

@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "Host-name , Same or Different" > opt-m.csv
+for i in `cat list`
+do
+        echo "Checking instance " $i
+        echo -n $i " ," >> opt-m.csv
+        file1="/home/shs-admin/ajoshi/Final_Scripts/amazon-cloudwatch-agent.json"
+        ssh $i 'cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/file_amazon-cloudwatch-agent.json' | diff -wbBq -  "$file1"
+        exit_code=$?
+        if [ $exit_code -eq 0 ];then
+                echo " Same" >> opt-m.csv
+        elif [ $exit_code -eq 1 ];then
+                echo " Different" >> opt-m.csv
+        else
+                echo "Error in finding file" $i
+        fi
+done

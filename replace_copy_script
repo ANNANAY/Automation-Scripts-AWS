@@ -1,0 +1,9 @@
+#!/bin/bash
+for i in `cat list`
+do
+        cat move-replace-file | ssh $i 'bash -'
+        scp amazon-cloudwatch-agent.json $i:/home/shs-admin/.
+        ssh $i "sudo mv /home/shs-admin/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/."
+        ssh $i "sudo chown root:root /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+        ssh $i "sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s"
+done
