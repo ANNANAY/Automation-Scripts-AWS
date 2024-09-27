@@ -30,5 +30,10 @@ do
 findfile=`ls /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/`
 newname=`awk`
 
+change-the-cw-file
+aws s3 cp s3://hsarch-artifactory-523140806637-us-east-2/Build_Files/amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d
+
 done
 
